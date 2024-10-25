@@ -1,0 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.link:hover {
+  stroke-opacity: 0.8;
+}
