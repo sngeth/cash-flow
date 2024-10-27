@@ -18,28 +18,30 @@ export default function BillItems({
       <h4 className="text-lg font-semibold mb-4 text-gray-700">Bill Line Items</h4>
       <div className="space-y-4">
         {items.map((item, index) => (
-          <div key={index} className="flex items-center space-x-2">
+          <div key={index} className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
             <input
               type="text"
               placeholder="Item name"
               value={item.name}
               onChange={(e) => onUpdateItem(index, 'name', e.target.value)}
-              className="flex-grow rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+              className="w-full sm:w-1/2 rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
             />
-            <input
-              type="number"
-              placeholder="Amount"
-              value={item.amount === 0 ? '' : item.amount}
-              onChange={(e) => onUpdateItem(index, 'amount', parseFloat(e.target.value) || 0)}
-              className="w-1/3 rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-            />
-            <button
-              onClick={() => onDeleteItem(index)}
-              className="p-2 text-gray-500 hover:text-red-500 focus:outline-none text-xl"
-              title="Delete item"
-            >
-              🗑️
-            </button>
+            <div className="flex w-full sm:w-1/2 items-center space-x-2">
+              <input
+                type="number"
+                placeholder="Amount"
+                value={item.amount === 0 ? '' : item.amount}
+                onChange={(e) => onUpdateItem(index, 'amount', parseFloat(e.target.value) || 0)}
+                className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+              />
+              <button
+                onClick={() => onDeleteItem(index)}
+                className="p-2 text-gray-500 hover:text-red-500 focus:outline-none text-xl"
+                title="Delete item"
+              >
+                🗑️
+              </button>
+            </div>
           </div>
         ))}
       </div>

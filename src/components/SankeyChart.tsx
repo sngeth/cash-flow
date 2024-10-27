@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import * as d3 from 'd3';
 import { sankey, sankeyLinkHorizontal, SankeyGraph, SankeyNode, SankeyLink } from 'd3-sankey';
 import { BillItem } from '../types';
@@ -16,12 +16,12 @@ interface SankeyNodeExtended extends SankeyNode<{}, {}> {
 export default function SankeyChart({ income, savings, billItems }: SankeyChartProps) {
   const svgRef = useRef<SVGSVGElement>(null);
 
-  useEffect(() => {
+  const createChart = useCallback(() => {
     if (!svgRef.current) return;
 
     const svg = d3.select(svgRef.current);
     const width = svg.node()!.getBoundingClientRect().width;
-    const height = 700;
+    const height = svg.node()!.getBoundingClientRect().height;
 
     // Clear previous chart
     svg.selectAll('*').remove();
@@ -48,12 +48,15 @@ export default function SankeyChart({ income, savings, billItems }: SankeyChartP
       ]
     };
 
+    // Adjust node padding based on screen width
+    const nodePadding = width < 600 ? 10 : 20;
+ 
     // Create sankey generator
     const sankeyGenerator = sankey<SankeyNodeExtended, SankeyLink<SankeyNodeExtended, {}>>()
       .nodeWidth(10)
-      .nodePadding(20)
+      .nodePadding(nodePadding)
       .extent([[1, 1], [width - 1, height - 6]]);
-
+ 
     // Generate the sankey diagram
     const { nodes, links } = sankeyGenerator(graph);
 
@@ -75,7 +78,7 @@ export default function SankeyChart({ income, savings, billItems }: SankeyChartP
       .data(nodes)
       .join("g")
       .attr("class", "node");
-
+  
     node.append("rect")
       .attr("x", d => d.x0 ?? 0)
       .attr("y", d => d.y0 ?? 0)
@@ -83,23 +86,42 @@ export default function SankeyChart({ income, savings, billItems }: SankeyChartP
       .attr("width", d => (d.x1 ?? 0) - (d.x0 ?? 0))
       .attr("fill", (_, i) => d3.schemeCategory10[i % 10])
       .style("fill-opacity", 0.8);
-
+  
+    // Adjust font size based on screen width
+    const fontSize = width < 600 ? "10px" : "12px";
+  
     // Add labels
     node.append("text")
       .attr("x", d => (d.x0 ?? 0) < width / 2 ? (d.x1 ?? 0) + 6 : (d.x0 ?? 0) - 6)
       .attr("y", d => ((d.y1 ?? 0) + (d.y0 ?? 0)) / 2)
       .attr("dy", "0.35em")
       .attr("text-anchor", d => (d.x0 ?? 0) < width / 2 ? "start" : "end")
+      .attr("font-size", fontSize)
       .text(d => `${d.name}: $${d.value ?? 0}`);
-
+  
   }, [income, savings, billItems]);
+
+  useEffect(() => {
+    createChart();
+
+    const handleResize = () => {
+      createChart();
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [createChart]);
 
   return (
     <svg 
       ref={svgRef}
       width="100%"
-      height={700}
+      height="100%"
       className="bg-white rounded-lg shadow"
+      style={{ minHeight: '500px', maxHeight: '700px' }}
     />
   );
 }
